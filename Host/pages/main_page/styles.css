@@ -1,60 +1,64 @@
-/* styles.css */
 body {
     font-family: sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background-color: #f4f4f4;
     margin: 0;
-    background-color: #f4f4f4; /* Светло-серый фон */
 }
 
 .container {
-    background-color: white;
-    padding: 20px;
+    background-color: #fff;
+    padding: 30px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
 }
 
 label {
     display: block;
     margin-bottom: 5px;
-    font-weight: bold;
+    color: #555;
 }
 
-input[type="text"],
 input[type="date"] {
-    width: calc(100% - 12px); /* Учитываем padding */
-    padding: 6px;
-    margin-bottom: 10px;
+    width: 100%;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
 }
 
-
 button {
-    background-color: #4CAF50; /* Зеленый */
-    color: white;
-    padding: 10px 15px;
+    background-color: #4CAF50; /* Green */
     border: none;
-    border-radius: 4px;
+    color: white;
+    padding: 12px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
     cursor: pointer;
-    width: 100%;
-    margin-bottom: 15px;
-}
-
-button:hover {
-    background-color: #45a049; /* Более темный зеленый при наведении */
+    border-radius: 4px;
 }
 
 .output-area {
+    margin-top: 20px;
+    padding: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    padding: 10px;
-    min-height: 50px;  /* Чтобы область вывода всегда имела минимальную высоту */
-    white-space: pre-wrap; /* Для переноса длинных строк */
+    background-color: #f9f9f9;
+    min-height: 100px; /* Ensure enough space for the horoscope */
+    white-space: pre-line; /* Preserve line breaks in horoscope text */
 }
-
-
