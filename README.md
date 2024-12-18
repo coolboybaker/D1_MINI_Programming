@@ -1,3 +1,6 @@
 # Mobile_Programming
-А set of programs for firmware and remote control of the board
-Work for study.
+Мобильное приложение - Гороскоп
+Группа Рис-21-1б
+Горин Анатолий - @coolboybaker - бэкенд мобильного приложения (c#)
+Матаков Михаил - @RuBleckBlack - фронтенд мобильного приложения (html, css)
+Саид Набиев - @recommence - серверная часть, разработка алгоритма постройки гороскопа (python)
