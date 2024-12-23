@@ -253,7 +253,7 @@ class HoroscopeHandler(BaseHTTPRequestHandler):
             self.wfile.write(b"404 Not Found")
 
 if __name__ == "__main__":
-    server_address = ("0.0.0.0", 8080)
+    server_address = ("192.168.1.4", 8080)
     httpd = HTTPServer(server_address, HoroscopeHandler)
-    print("Server running at: http://0.0.0.0:8080")
+    print("Server running at: http://192.168.1.4:8080")
     httpd.serve_forever()
