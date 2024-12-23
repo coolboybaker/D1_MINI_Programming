@@ -1,11 +1,11 @@
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import json
+from urllib.parse import parse_qs, urlparse
 import datetime
 import random
 import math
 from collections import defaultdict
 from typing import List, Tuple, Dict
-from colorama import Fore, Back, Style, init
-
-init(autoreset=True)
 
 class CelestialBody:
     def __init__(self, name: str, symbol: str, degrees: float):
@@ -171,38 +171,38 @@ class HoroscopeGenerator:
     def calculate_compatibility(self, sign1: ZodiacSign, sign2: ZodiacSign) -> float:
         base_compatibility = random.uniform(0.5, 1.0)
         element_bonus = 0.1 if sign1.element == sign2.element else 0
-        quality_quality_bonus = 0.1 if sign1.quality == sign2.quality else 0
+        quality_bonus = 0.1 if sign1.quality == sign2.quality else 0
         return min(base_compatibility + element_bonus + quality_bonus, 1.0)
 
     def generate_horoscope(self, birth_date: datetime.date, current_date: datetime.date) -> str:
         chart = self.generate_astrological_chart(birth_date)
         zodiac_sign = chart.zodiac_sign
-        horoscope = f"{Fore.CYAN}{Style.BRIGHT}Гороскоп для {zodiac_sign.name} {zodiac_sign.symbol} на {current_date.strftime('%d.%m.%Y')}:\n\n"
+        horoscope = f"Гороскоп для {zodiac_sign.name} {zodiac_sign.symbol} на {current_date.strftime('%d.%m.%Y')}:\n\n"
 
         for aspect in self.aspects:
             prediction = random.choice(self.predictions[zodiac_sign.name][aspect])
-            horoscope += f"{Fore.YELLOW}{aspect}{Style.RESET_ALL}: {prediction}\n\n"
+            horoscope += f"{aspect}: {prediction}\n\n"
 
         lucky_number = random.randint(1, 100)
         lucky_color = self.colors[zodiac_sign.name]
 
-        horoscope += f"{Fore.GREEN}Счастливое число: {lucky_number}\n"
+        horoscope += f"Счастливое число: {lucky_number}\n"
         horoscope += f"Счастливый цвет: {lucky_color}\n\n"
 
-        horoscope += f"{Fore.MAGENTA}Астрологическая карта:\n"
+        horoscope += f"Астрологическая карта:\n"
         horoscope += f"Солнечный знак: {zodiac_sign.name} {zodiac_sign.symbol}\n"
         horoscope += f"Асцендент: {chart.ascendant.name} {chart.ascendant.symbol}\n"
         horoscope += f"Лунный знак: {chart.moon_sign.name} {chart.moon_sign.symbol}\n\n"
 
-        horoscope += f"{Fore.BLUE}Положение планет:\n"
+        horoscope += f"Положение планет:\n"
         for planet in chart.planets:
             sign = self.zodiac_signs[math.floor(planet.degrees / 30)]
             horoscope += f"{planet.name} {planet.symbol}: {sign.name} {sign.symbol} ({planet.degrees:.2f}°)\n"
 
         compatibility = self.calculate_compatibility(zodiac_sign, chart.moon_sign)
-        horoscope += f"\n{Fore.RED}Совместимость с Лунным знаком: {compatibility:.2%}\n"
+        horoscope += f"\nСовместимость с Лунным знаком: {compatibility:.2%}\n"
 
-        horoscope += f"\n{Fore.WHITE}{Style.BRIGHT}Совет дня: {self.get_daily_advice(zodiac_sign)}\n"
+        horoscope += f"\nСовет дня: {self.get_daily_advice(zodiac_sign)}\n"
 
         return horoscope
 
@@ -221,30 +221,39 @@ class HoroscopeGenerator:
         ]
         return random.choice(advices)
 
-class HoroscopeApp:
-    def __init__(self):
+class HoroscopeHandler(BaseHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
         self.generator = HoroscopeGenerator()
+        super().__init__(*args, **kwargs)
 
-    def run(self):
-        print(f"{Fore.CYAN}{Style.BRIGHT}Добро пожаловать в продвинутый генератор гороскопов!{Style.RESET_ALL}")
-        while True:
+    def do_GET(self):
+        if self.path.startswith("/horoscope"):
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+
+            query = urlparse(self.path).query
+            params = parse_qs(query)
+            
+            birth_date_str = params.get('birth_date', [''])[0]
             try:
-                birth_date_str = input(f"{Fore.GREEN}Введите вашу дату рождения (ДД.ММ.ГГГГ): {Style.RESET_ALL}")
                 birth_date = datetime.datetime.strptime(birth_date_str, "%d.%m.%Y").date()
                 current_date = datetime.date.today()
                 
                 horoscope = self.generator.generate_horoscope(birth_date, current_date)
-                print("\n" + "=" * 50 + "\n")
-                print(horoscope)
-                print("=" * 50 + "\n")
                 
-                again = input(f"{Fore.YELLOW}Хотите сгенерировать еще один гороскоп? (да/нет): {Style.RESET_ALL}").lower()
-                if again != 'да':
-                    print(f"{Fore.MAGENTA}{Style.BRIGHT}Спасибо за использование продвинутого генератора гороскопов!{Style.RESET_ALL}")
-                    break
+                response = json.dumps({"horoscope": horoscope}, ensure_ascii=False)
+                self.wfile.write(response.encode('utf-8'))
             except ValueError:
-                print(f"{Fore.RED}Ошибка: Пожалуйста, введите дату в формате ДД.ММ.ГГГГ{Style.RESET_ALL}")
+                error_message = json.dumps({"error": "Invalid date format. Please use DD.MM.YYYY"})
+                self.wfile.write(error_message.encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b"404 Not Found")
 
 if __name__ == "__main__":
-    app = HoroscopeApp()
-    app.run()
+    server_address = ("0.0.0.0", 8080)
+    httpd = HTTPServer(server_address, HoroscopeHandler)
+    print("Server running at: http://0.0.0.0:8080")
+    httpd.serve_forever()
