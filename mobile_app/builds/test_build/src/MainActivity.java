@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private Button fetchHoroscopeButton;
     private RequestQueue requestQueue;
 
-    private static final String SERVER_URL = "http://your_server_ip:8080/horoscope";
+    private static final String SERVER_URL = "http://192.168.1.4:8080/horoscope";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
