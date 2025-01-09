@@ -228,29 +228,39 @@ class HoroscopeHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.startswith("/horoscope"):
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-
             query = urlparse(self.path).query
             params = parse_qs(query)
             
+            if 'birth_date' not in params:
+                self.send_error(400, "Missing required parameter: birth_date")
+                return
+
             birth_date_str = params.get('birth_date', [''])[0]
+
             try:
                 birth_date = datetime.datetime.strptime(birth_date_str, "%d.%m.%Y").date()
                 current_date = datetime.date.today()
-                
-                horoscope = self.generator.generate_horoscope(birth_date, current_date)
-                
+
+                try:
+                    horoscope = self.generator.generate_horoscope(birth_date, current_date)
+                except Exception as e:
+                    self.send_error(500, f"Error generating horoscope: {str(e)}")
+                    return
+
                 response = json.dumps({"horoscope": horoscope}, ensure_ascii=False)
+
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Content-Length", len(response.encode('utf-8')))
+                self.end_headers()
                 self.wfile.write(response.encode('utf-8'))
+
             except ValueError:
-                error_message = json.dumps({"error": "Invalid date format. Please use DD.MM.YYYY"})
-                self.wfile.write(error_message.encode())
+                self.send_error(400, "Invalid date format. Please use DD.MM.YYYY")
+            except Exception as e:
+                self.send_error(500, f"Internal server error: {str(e)}")
         else:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write(b"404 Not Found")
+            self.send_error(404, "Not Found")
 
 if __name__ == "__main__":
     server_address = ("192.168.1.4", 8080)
